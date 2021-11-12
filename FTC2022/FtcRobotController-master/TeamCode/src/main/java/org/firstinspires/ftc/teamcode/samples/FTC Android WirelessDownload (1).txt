@@ -1,0 +1,44 @@
+As you have no doubt learned, deploying code with a USB cable is time consuming and means taking the controller phone off the robot. When you are developing actual robot code, you will be doing this a lot. There is a better way.
+
+You can deploy your code over a WiFi network instead of using a cable. This is much quicker and leaves the controller phone on the robot. Here are the instructions on how to do it using WiFi Direct.
+
+We will use the Android Debug Bridge (adb) app running on the phone and configure it to provide communication between the phone and your PC over WiFi. Normally, you would open the terminal window (bottom of the AS screen) and issue commands to ADB to get this running. We will create three AS External Tools to make the process easier.
+5
+Android Studio allows for the creation of External Tools, which will appear in the main window’s Tools / ExternalTools menu. These tools can do just about anything, and they can easily be used to run adb commands on the click of a button.
+
+In Android Studio, open the main settings panel:
+
+On Mac OS, click “Android Studio”, then “Preferences…” (or simply press the hotkey “⌘,”).
+On Windows, click “File”, then “Settings…”.
+In the settings panel:
+
+Expand the “Tools” item
+Click “External Tools” to open the External Tools list. The list is normally empty.
+For each of the following tools below, click the [+] button, and fill in the provided fields (leaving all others unchanged). Once each tool screen is filled-in, click “OK” to save. (Note: The “Program” field is the same, so the value can be cut and pasted to avoid re-typing.) Once all tools have been added, click the main settings panel’s “OK” button to save.
+“Enable ADB over TCP/IP”
+Field	Value
+Name:	Enable ADB over TCP/IP
+Program:	$ModuleSdkPath$\platform-tools\adb.exe
+Parameters:	tcpip 5555
+“Connect to ADB over WiFi Direct”
+Field	Value
+Name:	Connect to ADB over WiFi Direct
+Program:	$ModuleSdkPath$\platform-tools\adb.exe
+Parameters:	connect 192.168.43.1:5555
+“Disconnect ADB”
+
+Field	Value
+Name:	Disconnect ADB
+Program:	$ModuleSdkPath$\platform-tools\adb.exe
+Parameters:	disconnect6
+With this done, you attach the phone to the PC with the USB cable. When the PC has recognized the phone, run the Enable ADB over TCP/IP external tool (Tools pull down menu->External Tools). When the command file has completed, disconnect the USB cable. You need to do this step with the USB cable each time you reboot the phone. Note: when running these external tool commands, you must have a java source file in your project open with the cursor in that file when you execute the external tool.
+
+On the controller app go to the settings menu and select Program & Manage. On the next screen you will see the name of the network created by the phone, something like DIRECT-xy-1234-RC. On your development PC, connect to that network name and use the network pass code displayed on the phone. Select to Automatically Connect so the PC will remember the pass code on future connections. The name of the WiFi Direct network should not change unless you change the name of the controller phone. Now run the Connect to ADB over WiFi Direct external tool in AS. This connects your PC to the phone over WiFi Direct. The connection will remain until you disconnect from the phone's network.
+
+Now, when you compile in AS, the networked controller phone will be available as a deployment target. Compiled code will be sent to the phone over the network connection. 
+
+Note: while connected to WiFi Direct, your connection to the internet will not be available. You will need to switch networks when you need Internet access. If you do wish switch to another connection, run the Disconnect ADB tool before switching. When you switch back to the phone WiFi Direct network,  you will need to run the Connect to ADB over WiFi Direct tool again to restablish the connection between AS and the phone. Also, a reminder that the first time you connect to the RC phone from any PC, you will be prompted on the phone to accept the PC's RSA Security Key before the first connection will be completed.
+
+Note: If you do not disconnect adb before switching to away from the phone network, when you switch back to the phone network, when you try to compile, in the window where you select the phone for deployment, it may be marked as [OFFLINE] and won't allow deployment. When this happens run the Disconnect ABD tool then run the Connect to ADB tool again and that should fix it.
+
+Note: you can add the three external tools to the tool bar above the editing area. This left to you to figure out how, but to get started, right click on the tool bar.
