@@ -195,11 +195,13 @@ public class TeleOp1 extends OpMode
         if(gamepad1.y){
             if(!clicking){
                 if(intakeRotationID != 1){
-                    robot.Intake.setPower(0.8);
+                    robot.Intake1.setPower(0.8);
+                    robot.Intake2.setPower(0.8);
                     intakeRotationID = 1;
                 }
                 else{
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     intakeRotationID = 0;
                 }
                 clicking = true;
@@ -208,11 +210,13 @@ public class TeleOp1 extends OpMode
         else if(gamepad1.a){
             if(!clicking){
                 if(intakeRotationID != 2){
-                    robot.Intake.setPower(-0.8);
+                    robot.Intake1.setPower(-0.8);
+                    robot.Intake2.setPower(-0.8);
                     intakeRotationID = 2;
                 }
                 else{
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     intakeRotationID = 0;
                 }
                 clicking = true;

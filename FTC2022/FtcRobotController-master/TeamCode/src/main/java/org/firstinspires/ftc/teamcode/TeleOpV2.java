@@ -89,6 +89,8 @@ public class TeleOpV2 extends OpMode
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    private boolean btnStartRelease = true;
+    private int hookPosID = 0;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -217,6 +219,13 @@ public class TeleOpV2 extends OpMode
             if(CMTogglePos == 0) robot.CM.setPower(0);
             else if(CMTogglePos == 1) robot.CM.setPower(-0.25);
 
+            if(robot.blockSensor.red() > 400){
+                robot.CM.setPower(-0.25);
+            }
+            else{
+                robot.CM.setPower(0);
+            }
+
             telemetry.addData("SensorData: ", robot.colorSensor.red() + " " + robot.colorSensor.green() + " " + robot.colorSensor.blue());
 //        telemetry.addData("asc", "aaa " + intakeRotationID);
 
@@ -298,11 +307,13 @@ public class TeleOpV2 extends OpMode
         if(gamepad1.x){
             if(!clicking && !runningThread){
                 if(intakeRotationID != 1){
-                    robot.Intake.setPower(0.8);
+                    robot.Intake1.setPower(1.0);
+                    robot.Intake2.setPower(1.0);
                     intakeRotationID = 1;
                 }
                 else{
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     intakeRotationID = 0;
                 }
                 clicking = true;
@@ -311,17 +322,19 @@ public class TeleOpV2 extends OpMode
         else if(gamepad1.a) {
             if (!clicking && !runningThread) {
                 if (intakeRotationID != 2) {
-                    robot.Intake.setPower(-0.8);
+                    robot.Intake1.setPower(-0.8);
+                    robot.Intake2.setPower(-0.8);
                     intakeRotationID = 2;
                 } else {
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     intakeRotationID = 0;
                 }
                 clicking = true;
             }
         }
         else if(gamepad1.y){
-            if(!clicking && !runningThread){
+            if(!clicking && !runningThread && robot.blockSensor.red() > 400){
                 DropShipmentV2();
                 clicking = true;
             }
@@ -339,11 +352,29 @@ public class TeleOpV2 extends OpMode
             clicking = false;
         }
 
+        if (gamepad1.start){
+            if (btnStartRelease){
+                btnStartRelease = false;
+                if (hookPosID != 1){
+                    robot.hookServo.setPosition(0.75);
+                    hookPosID = 1;
+                }
+                else{
+                    hookPosID = 2;
+                    robot.hookServo.setPosition(0.5);
+                }
+            }
+            //open
+        }
+        else{
+            btnStartRelease = true;
+        }
 
 
-//        telemetry.addData("Motor Encoder", "Arm Extend Encoder  = " + (robot.Arm_E.getCurrentPosition()));
+        telemetry.addData("Motor Encoder", "Arm Extend Encoder  = " + (robot.Arm_E.getCurrentPosition()));
 //        telemetry.addData("Motor Encoder", "Arm Encoder  = " + (robot.Arm_H.getCurrentPosition()));
-//
+        telemetry.addData("Color",  "at %d:%d:%d",robot.colorSensor.red(), robot.colorSensor.green(), robot.colorSensor.blue());
+        telemetry.addData("Block",  "at %d:%d:%d",robot.blockSensor.red(), robot.blockSensor.green(), robot.blockSensor.blue());
 //        telemetry.addData("Position", "X = " + robotPos[0] + " | Y: " + robotPos[1] + " | Rot: " + robotPos[2]);
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.update();
@@ -389,9 +420,11 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    robot.Intake.setPower(-0.8);
+                    robot.Intake1.setPower(-0.8);
+                    robot.Intake2.setPower(-0.8);
                     Thread.sleep(800);
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     robot.Arm_E.setTargetPosition(10);
                     robot.Arm_E.setPower(0.8);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -408,7 +441,8 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    robot.Intake.setPower(0.8);
+                    robot.Intake1.setPower(1.0);
+                    robot.Intake2.setPower(1.0);
                     positionControl.InterruptThread();
                     runningThread = false;
                     armPositinCtrl = false;
@@ -445,7 +479,7 @@ public class TeleOpV2 extends OpMode
                     robot.Arm_H.setPower(1.0);
                     robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     robot.Arm_E.setTargetPosition(2400);
-                    robot.Arm_E.setPower(0.5);
+                    robot.Arm_E.setPower(0.8);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                     if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]), 2.5, 90, 0.1, 1,3, true)) {
@@ -453,20 +487,22 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] - 0.57, robotPos[1] + 0.22, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3, true)) {
+                    if(goToWayPoint(robotPos[0] - 0.57, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
                     }
 
-                    robot.Intake.setPower(-0.8);
+                    robot.Intake1.setPower(-0.8);
+                    robot.Intake2.setPower(-0.8);
                     Thread.sleep(500);
-                    robot.Intake.setPower(0);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
                     robot.Arm_E.setTargetPosition(0);
                     robot.Arm_E.setPower(1);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmDelay(800,PICK_POSITION);
-                    if(goToWayPoint(robotPos[0] + 0.50, robotPos[1] - 0.22, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3, true)) {
+                    if(goToWayPoint(robotPos[0] + 0.50, robotPos[1] - 0.15, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
@@ -476,7 +512,8 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    robot.Intake.setPower(0.8);
+                    robot.Intake1.setPower(1.0);
+                    robot.Intake2.setPower(1.0);
                     positionControl.InterruptThread();
                     runningThread = false;
                     armPositinCtrl = false;
@@ -528,7 +565,7 @@ public class TeleOpV2 extends OpMode
             a++;
             Thread.sleep(25);
         }
-
+        positionControl.InterruptThread();
         Thread.sleep(50);
     }
 
@@ -572,5 +609,3 @@ public class TeleOpV2 extends OpMode
     }
 
 }
-
-

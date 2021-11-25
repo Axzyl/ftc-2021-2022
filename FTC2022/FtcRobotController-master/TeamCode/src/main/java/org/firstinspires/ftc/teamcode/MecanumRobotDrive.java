@@ -27,10 +27,13 @@ public class MecanumRobotDrive {
     public DcMotor Arm_E = null;
     public DcMotor Arm_H = null;
     public DcMotor CM = null;
-    public CRServo Intake = null;
-
+    public CRServo Intake1 = null;
+    public CRServo Intake2 = null;
     public BNO055IMU imu;
     public ColorSensor colorSensor;
+    public ColorSensor blockSensor;
+
+    public Servo hookServo = null;
 
     int initArmE = 0;
     int initArmH = 0;
@@ -56,6 +59,17 @@ public class MecanumRobotDrive {
         Arm_E.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Arm_E.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);   //if using position control , need set to brake
         Arm_E.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Arm_E.setPower(-0.12);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Arm_E.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Arm_E.setTargetPosition(0);
+        Arm_E.setPower(1.0);
+        Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         Arm_H = hardwareMap.get(DcMotor.class, "Arm_H");
         Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -80,9 +94,13 @@ public class MecanumRobotDrive {
         Arm_H.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         colorSensor = hardwareMap.colorSensor.get("colour");
+        blockSensor = hardwareMap.colorSensor.get("block");
 
         CM  = hardwareMap.get(DcMotor.class, "CM");
-        Intake = hardwareMap.get(CRServo.class, "Intake");
+        Intake1 = hardwareMap.get(CRServo.class, "Intake1");
+        Intake2 = hardwareMap.get(CRServo.class, "Intake2");
+        Intake1.setDirection(DcMotorSimple.Direction.FORWARD);
+        Intake2.setDirection(DcMotorSimple.Direction.REVERSE);
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         lf.setDirection(DcMotor.Direction.REVERSE);
@@ -96,10 +114,14 @@ public class MecanumRobotDrive {
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
+
         // Tell the driver that initialization is complete.
         Arm_E.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         initArmE = Arm_E.getCurrentPosition();
         CM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        hookServo = hardwareMap.get(Servo.class, "Hook");
+        hookServo.setPosition(1.0);   //1.0 reset  //0.5 close, //open 0.75
 
         //please keep the robtot still to reset IMU
         try {
