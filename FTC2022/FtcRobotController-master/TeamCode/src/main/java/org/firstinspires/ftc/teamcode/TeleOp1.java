@@ -91,8 +91,6 @@ public class TeleOp1 extends OpMode
         // step (using the FTC Robot Controller app on the phone).
         robot = new MecanumRobotDrive(hardwareMap);
          telemetry.addData("Status", "Initialized");
-        posEstimation = new PositionEstimation(robot);
-        posControl = new PositionControl(robot, posEstimation);
 
     }
 
@@ -134,9 +132,9 @@ public class TeleOp1 extends OpMode
         ////leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
         ////rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
-        double drive  = Math.pow(-gamepad1.left_stick_y,3);
-        double strafe = Math.pow(gamepad1.left_stick_x,3);
-        double twist  = Math.pow(gamepad1.right_stick_x,5);
+        double drive  = -gamepad1.left_stick_y;
+        double strafe = gamepad1.left_stick_x;
+        double twist  = gamepad1.right_stick_x;
 
         //may need set 2 level maximum speed
         double[] speeds = {

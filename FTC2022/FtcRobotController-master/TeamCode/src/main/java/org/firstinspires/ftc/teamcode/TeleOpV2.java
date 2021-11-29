@@ -91,6 +91,10 @@ public class TeleOpV2 extends OpMode
 
     private boolean btnStartRelease = true;
     private int hookPosID = 0;
+
+    double offsetX = 0;
+    double offsetY = 0;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -231,47 +235,7 @@ public class TeleOpV2 extends OpMode
 
             //arm_h control here
             //dpad preset position control
-            if(gamepad1.dpad_up){
-                if(!dpadClick){
-                    robot.Arm_H.setTargetPosition(LEVEL3_POSITION);
-                    robot.Arm_H.setPower(1.0);
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    dpadClick = true;
-                    armPositinCtrl = true;
-                }
-            }
-            else if(gamepad1.dpad_left){
-                if(!dpadClick){
-                    robot.Arm_H.setTargetPosition(LEVEL2_POSITION);
-                    robot.Arm_H.setPower(1.0);
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    dpadClick = true;
-                    armPositinCtrl = true;
-                }
-            }
-            else if(gamepad1.dpad_right){
-                if(!dpadClick){
-                    robot.Arm_H.setTargetPosition(LEVEL1_POSITION);
-                    robot.Arm_H.setPower(1.0);
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    dpadClick = true;
-                    armPositinCtrl = true;
-                }
-            }
-            else if(gamepad1.dpad_down){
-                if(!dpadClick){
 
-                    robot.Arm_H.setTargetPosition(PICK_POSITION);
-                    robot.Arm_H.setPower(1.0);
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    dpadClick = true;
-                    armPositinCtrl = true;
-                }
-            }
-            else{
-                //robot.Arm_H.setPower(0);
-                dpadClick = false;
-            }
 
             //left/right trigger button manually control, need set position to protect
             if(gamepad1.left_trigger > 0.5){
@@ -334,7 +298,7 @@ public class TeleOpV2 extends OpMode
             }
         }
         else if(gamepad1.y){
-            if(!clicking && !runningThread && robot.blockSensor.red() > 400){
+            if(!clicking && !runningThread){
                 DropShipmentV2();
                 clicking = true;
             }
@@ -370,6 +334,67 @@ public class TeleOpV2 extends OpMode
             btnStartRelease = true;
         }
 
+        if(gamepad1.dpad_up){
+            if(!dpadClick){
+                if(!runningThread){
+                    robot.Arm_H.setTargetPosition(LEVEL3_POSITION);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    dpadClick = true;
+                    armPositinCtrl = true;
+                }
+                else{
+                    offsetY += 0.2f;
+                }
+
+            }
+        }
+        else if(gamepad1.dpad_left){
+            if(!dpadClick){
+                if(!runningThread) {
+                    robot.Arm_H.setTargetPosition(LEVEL2_POSITION);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    dpadClick = true;
+                    armPositinCtrl = true;
+                }
+                else{
+                    offsetX -= 0.2f;
+                }
+            }
+        }
+        else if(gamepad1.dpad_right){
+            if(!dpadClick){
+                if(!runningThread) {
+                    robot.Arm_H.setTargetPosition(LEVEL1_POSITION);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    dpadClick = true;
+                    armPositinCtrl = true;
+                }
+                else{
+                    offsetX += 0.2f;
+                }
+            }
+        }
+        else if(gamepad1.dpad_down){
+            if(!dpadClick){
+                if(!runningThread) {
+                    robot.Arm_H.setTargetPosition(PICK_POSITION);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    dpadClick = true;
+                    armPositinCtrl = true;
+                }
+                else{
+                    offsetY -= 0.2f;
+                }
+            }
+        }
+        else{
+            //robot.Arm_H.setPower(0);
+            dpadClick = false;
+        }
 
         telemetry.addData("Motor Encoder", "Arm Extend Encoder  = " + (robot.Arm_E.getCurrentPosition()));
 //        telemetry.addData("Motor Encoder", "Arm Encoder  = " + (robot.Arm_H.getCurrentPosition()));
@@ -487,7 +512,7 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] - 0.57, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3, true)) {
+                    if(goToWayPoint(robotPos[0] - 0.57, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90, 2.5, 180, 0.02, 1,3, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
@@ -502,12 +527,12 @@ public class TeleOpV2 extends OpMode
                     robot.Arm_E.setPower(1);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmDelay(800,PICK_POSITION);
-                    if(goToWayPoint(robotPos[0] + 0.50, robotPos[1] - 0.15, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3, true)) {
+                    if(goToWayPoint(robotPos[0] + 0.50, robotPos[1] - 0.20, RadtoDeg(robotPos[2]) - 90, 2, 360, 0.1, 4,3, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] + 0.54, robotPos[1] - 0.05, RadtoDeg(robotPos[2]), 2.5, 180, 0.1, 4,3, true)) {
+                    if(goToWayPoint(robotPos[0] + 0.54, robotPos[1] - 0.10, RadtoDeg(robotPos[2]), 2.5, 180, 0.1, 4,3, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
@@ -545,30 +570,6 @@ public class TeleOpV2 extends OpMode
         return rad / (2 * Math.PI) * 360;
     }
 
-    private void goToWayPoint(double x, double y, double angle, double vel, double vw, double disRes, double angleRes, double timeLimit) throws InterruptedException {
-        targetPos[0] = x;//1.5;  //x
-        targetPos[1] = y;//-0.6;   //y
-        targetPos[2] = angle * Math.PI / 180; // Math.PI /2;   //heading, radian
-        this.positionControl.goToTargetPosition(targetPos, vel,vw * Math.PI / 180, disRes,angleRes);
-        float a = 0;
-        while(!this.positionControl.checkTaskDone() && a < timeLimit * 40){
-//            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            robotPos = positionEstimation.getRobotPos();
-            telemetry.addData("RobotPos",  "at %5f :%5f:%5f",
-                    robotPos[0], robotPos[1], robotPos[2] * 180 / Math.PI);
-            telemetry.addData("Debug",  "at %5f",
-                    positionControl.debug_task());
-            if (this.positionControl.checkTaskDone()){
-                telemetry.addData("Task", "Done");
-            }
-            telemetry.update();
-            a++;
-            Thread.sleep(25);
-        }
-        positionControl.InterruptThread();
-        Thread.sleep(50);
-    }
-
     private boolean goToWayPoint(double x, double y, double angle, double vel, double vw, double disRes, double angleRes, double timeLimit, boolean thread) throws InterruptedException {
         targetPos[0] = x;//1.5;  //x
         targetPos[1] = y;//-0.6;   //y
@@ -584,6 +585,7 @@ public class TeleOpV2 extends OpMode
                     positionControl.debug_task());
             if (this.positionControl.checkTaskDone()){
                 telemetry.addData("Task", "Done");
+                break;
             }
             telemetry.update();
             a++;
@@ -595,7 +597,40 @@ public class TeleOpV2 extends OpMode
 
             Thread.sleep(25);
         }
+        positionControl.SetTaskDone();
+        Thread.sleep(50);
+        return false;
+    }
 
+    private boolean goToWayPointOffset(double x, double y, double angle, double vel, double vw, double disRes, double angleRes, double timeLimit, boolean thread) throws InterruptedException {
+        targetPos[0] = x + offsetX;//1.5;  //x
+        targetPos[1] = y + offsetY;//-0.6;   //y
+        targetPos[2] = angle * Math.PI / 180; // Math.PI /2;   //heading, radian
+        double[] currentOffset = {offsetX, offsetY};
+        this.positionControl.goToTargetPosition(targetPos, vel,vw * Math.PI / 180, disRes,angleRes);
+        float a = 0;
+        while(!this.positionControl.checkTaskDone() && a < timeLimit * 40){
+//            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            robotPos = positionEstimation.getRobotPos();
+            telemetry.addData("RobotPos",  "at %5f :%5f:%5f",
+                    robotPos[0] + offsetX - currentOffset[0], robotPos[1] + offsetY - currentOffset[1], robotPos[2] * 180 / Math.PI);
+            telemetry.addData("Debug",  "at %5f",
+                    positionControl.debug_task());
+            if (this.positionControl.checkTaskDone()){
+                telemetry.addData("Task", "Done");
+                break;
+            }
+            telemetry.update();
+            a++;
+
+            if(gamepad1.y){
+                positionControl.SetTaskDone();
+                return true;
+            }
+
+            Thread.sleep(25);
+        }
+        positionControl.SetTaskDone();
         Thread.sleep(50);
         return false;
     }

@@ -105,9 +105,9 @@ public class Position_Linear extends LinearOpMode {
     private PositionControl positionControl = null;
     private volatile double[] robotPos = new double[3];
     private volatile double[] targetPos = new double[3];
-    private final int PICK_POSITION = 0;
+    private final int PICK_POSITION = 10;
     private final int LEVEL1_POSITION = 1078;
-    private final int LEVEL2_POSITION = 2180;
+    private final int LEVEL2_POSITION = 2300;
     private final int LEVEL3_POSITION = 3480;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -140,7 +140,7 @@ public class Position_Linear extends LinearOpMode {
             // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9).
-            tfod.setZoom(2.3, 16.0/9.0);
+            tfod.setZoom(2.15, 16.0/9.0);
         }
 
         //first detect object position
@@ -228,7 +228,7 @@ public class Position_Linear extends LinearOpMode {
             robot.Arm_E.setTargetPosition(400);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.50,0, 0.0,0.8,90, 0.04,1,5);
+            goToWayPoint(0.50,0.1, 0.0,0.8,90, 0.04,1,5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
@@ -241,7 +241,7 @@ public class Position_Linear extends LinearOpMode {
             robot.Arm_E.setTargetPosition(700);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.40,0, 0.0,0.8,90, 0.04,1,5);
+            goToWayPoint(0.45,0.1, 0.0,0.8,90, 0.04,1,5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
@@ -254,7 +254,7 @@ public class Position_Linear extends LinearOpMode {
             robot.Arm_E.setTargetPosition(800);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.50,0, 0.0,0.8,90, 0.04,1,5);
+            goToWayPoint(0.50,0.1, 0.0,0.8,90, 0.04,1,5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
@@ -281,13 +281,7 @@ public class Position_Linear extends LinearOpMode {
         robot.Arm_H.setPower(1.0);
         robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         goToWayPoint(-0.15,-1.0, -95,2,90, 0.02,1,5);
-        robot.Movement(0.4,0.4,0.4,0.4);
-        int a = 0;
-        while(robot.blockSensor.red() < 400 || a > 25){
-            Thread.sleep(100);
-            a++;
-        }
-        goToWayPoint(-0.2,-1.0, -90,1,90, 0.02,1,2);
+        goToWayPoint(-0.2,-1.0, -90,2,90, 0.02,1,1);
 
         DropShipmentV2();
 
@@ -388,13 +382,11 @@ public class Position_Linear extends LinearOpMode {
             @Override
             public void run() {
                 try {
-                    while(gamepad1.y){}
 
-                    goToWayPoint(robotPos[0] - 0.15, robotPos[1]-0.05, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
+                    goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.15, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
 
                     while(robot.colorSensor.red() < 600){
                         robot.Movement(-0.8,-0.8, -0.8, -0.6);
-
                     }
                     robot.Movement(0,0,0,0);
                     robot.Arm_H.setTargetPosition(3100);
@@ -404,10 +396,9 @@ public class Position_Linear extends LinearOpMode {
                     robot.Arm_E.setPower(0.8);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                    goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]), 2.5, 90, 0.1, 1,3);
+                    goToWayPoint(robotPos[0], robotPos[1] + 0.47, RadtoDeg(robotPos[2]), 2.5, 90, 0.1, 1,3);
 
-                    goToWayPoint(robotPos[0] - 0.57, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3);
-
+                    goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.57, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3);
 
                     robot.Intake1.setPower(-0.8);
                     robot.Intake2.setPower(-0.8);
@@ -418,12 +409,12 @@ public class Position_Linear extends LinearOpMode {
                     robot.Arm_E.setPower(1);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmDelay(800,PICK_POSITION);
-                    goToWayPoint(robotPos[0] + 0.50, robotPos[1] - 0.15, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3);
-
-                    goToWayPoint(robotPos[0] + 0.54, robotPos[1] - 0.05, RadtoDeg(robotPos[2]), 2.5, 180, 0.1, 4,3);
-
+                    goToWayPoint(robotPos[0] - 0.15, robotPos[1] - 0.50, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3);
                     robot.Intake1.setPower(1.0);
                     robot.Intake2.setPower(1.0);
+                    goToWayPoint(robotPos[0] - 0.05, robotPos[1] - 0.78, RadtoDeg(robotPos[2]), 2.5, 180, 0.1, 4,3);
+
+
                     positionControl.InterruptThread();
 
                 } catch (InterruptedException e) {
