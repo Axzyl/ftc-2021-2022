@@ -50,9 +50,9 @@ import java.util.Timer;
 
 // 2021 game, autonomous code
 
-@Autonomous(name="AutoCompetition", group="Linear Opmode")
+@Autonomous(name="CameraTest", group="Linear Opmode")
 //@Disabled
-public class Position_Linear extends LinearOpMode {
+public class CameraTest extends LinearOpMode {
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
      *  0: Ball,
@@ -109,7 +109,6 @@ public class Position_Linear extends LinearOpMode {
     private final int LEVEL1_POSITION = 1128;
     private final int LEVEL2_POSITION = 2300;
     private final int LEVEL3_POSITION = 3480;
-    boolean threadFinished = false;
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new MecanumRobotDrive(hardwareMap);
@@ -144,6 +143,13 @@ public class Position_Linear extends LinearOpMode {
             tfod.setZoom(2, 16.0/9.0);
         }
 
+        telemetry.addData("Status", "Initialized");
+
+        telemetry.addData(">", "Press Play to start autonomous program");
+        telemetry.update();
+
+        waitForStart();
+
         //first detect object position
         int markerCnt = 0;
         int duckCnt = 0;
@@ -152,7 +158,7 @@ public class Position_Linear extends LinearOpMode {
         boolean detectFlag = false;
         int posFlag = 1;
         List<Float> markers = new ArrayList<Float>();
-        while(!isStarted()){
+        while(opModeIsActive()){
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
@@ -160,7 +166,7 @@ public class Position_Linear extends LinearOpMode {
 
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
-
+                    markers.clear();
                     // step through the list of recognitions and display boundary info.
                     int i = 0;
 
@@ -168,7 +174,7 @@ public class Position_Linear extends LinearOpMode {
                         telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
                         if (recognition.getLabel().equals("Marker")) {
                             markers.add(recognition.getRight());
-                            //detectFlag = true;
+                            detectFlag = true;
                         }
 //                        else if (recognition.getLabel().equals("Duck")) {
 //                            duckX[duckCnt] = recognition.getRight();
@@ -181,172 +187,28 @@ public class Position_Linear extends LinearOpMode {
                                 recognition.getRight(), recognition.getBottom());
                         i++;
                     }
+
+                    if (markers.size() == 1){
+                        if (markers.get(0) > 700){
+                            posFlag = 1;
+                        }
+                        else{
+                            posFlag = 2;
+                        }
+                    }
+                    else{
+                        posFlag = 3;
+                    }
+
+                    telemetry.addData(">", "Position: " + posFlag);
+
+
                     telemetry.update();
                 }
             }
-
-            if (markers.size() == 1){
-                if (markers.get(0) > 700){
-                    posFlag = 1;
-                }
-                else{
-                    posFlag = 2;
-                }
-            }
-            else{
-                posFlag = 3;
-            }
-
-            telemetry.addData("Status", "Initialized");
-
-            telemetry.addData(">", "Press Play to start autonomous program");
-            telemetry.addData(">", "Position: " + posFlag);
-            telemetry.update();
         }
 
 
-
-        // Wait for the game to start (driver presses PLAY)
-        runtime.reset();
-
-//        telemetry.addData("Detect Position:", "%d", posFlag);
-        telemetry.update();
-        // understanding coordinate system
-        //              Robot Front
-        //                  ^ (X+)
-        //                  |
-        //                  |
-        //Robot Left(Y+)    |       Robot Right(Y-)
-        //<-----------------------------------------
-        //                  |
-        //                  |(X-)
-        //posFlag = 1;  //just for debug
-
-        if(!opModeIsActive()) stop();
-
-        if (posFlag == 1) {
-            robot.Arm_H.setTargetPosition(LEVEL1_POSITION);
-            robot.Arm_H.setPower(1.0);
-            robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //while(robot.Arm_H.getCurrentPosition() < LEVEL1_POSITION - 1600){}
-            robot.Arm_E.setTargetPosition(400);
-            robot.Arm_E.setPower(0.6);
-            robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.47,0.1, 0.0,0.8,90, 0.04,1,1.75);
-            robot.Movement(0,0,0,0);
-            robot.Intake1.setPower(-0.8);
-            robot.Intake2.setPower(-0.8);
-        }
-        if (posFlag == 2) {
-            robot.Arm_H.setTargetPosition(LEVEL2_POSITION);
-            robot.Arm_H.setPower(1.0);
-            robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            while(robot.Arm_H.getCurrentPosition() < LEVEL2_POSITION - 2400){}
-            robot.Arm_E.setTargetPosition(700);
-            robot.Arm_E.setPower(0.6);
-            robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.40,0.1, 0.0,0.8,90, 0.04,1,1.75);
-            robot.Movement(0,0,0,0);
-            robot.Intake1.setPower(-0.8);
-            robot.Intake2.setPower(-0.8);
-        }
-        if (posFlag == 3) {
-            robot.Arm_H.setTargetPosition(LEVEL3_POSITION);
-            robot.Arm_H.setPower(1.0);
-            robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            while(robot.Arm_H.getCurrentPosition() < LEVEL3_POSITION - 2400){}
-            robot.Arm_E.setTargetPosition(800);
-            robot.Arm_E.setPower(0.6);
-            robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.50,0.1, 0.0,0.8,90, 0.04,1,1.75);
-            robot.Movement(0,0,0,0);
-            robot.Intake1.setPower(-0.8);
-            robot.Intake2.setPower(-0.8);
-        }
-
-        Thread.sleep(2000);
-        robot.Intake1.setPower(0);
-        robot.Intake2.setPower(0);
-        robot.Arm_E.setTargetPosition(0);
-        robot.Arm_E.setPower(0.6);
-        robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        goToWayPoint(0.12,1.4, -90,2,180, 0.02,1,3.5);
-        robot.Movement(0.1,-0.3,-0.3,0.1);
-        Thread.sleep(1000);
-        robot.Movement(0,0,0,0);
-        //positionEstimation.ResetAll();
-        //goToWayPoint(-0.42,0, -90,0.8,90, 0.02,1);
-        robot.CM.setPower(-0.25);
-        Thread.sleep(2500);
-        robot.CM.setPower(0);
-
-        robot.Intake1.setPower(1);
-        robot.Intake2.setPower(1);
-        robot.Arm_H.setTargetPosition(PICK_POSITION);
-        robot.Arm_H.setPower(1.0);
-        robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        goToWayPoint(-0.14,-0.90, -95,2.25,90, 0.02,1,3);
-
-        int a = 0;
-        robot.Movement(0.3, 0.3, 0.3, 0.3);
-        while(robot.blockSensor.red() <= 100 && a < 25){
-            a += 1;
-            Thread.sleep(50);
-        }
-        robot.Movement(0.2,-0.8,-0.8,0.2);
-        Thread.sleep(350);
-        robot.Movement(0,0,0,0);
-        //goToWayPoint(-0.18,-0.95, -90,1.5,90, 0.02,1,5);
-
-        threadFinished = false;
-        DropShipmentV2();
-        while (!threadFinished){}
-
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.88, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
-
-        Thread.sleep(250);
-
-        a = 0;
-        robot.Movement(0.3, 0.3, 0.3, 0.3);
-        while(robot.blockSensor.red() <= 100 && a < 25){
-            a += 1;
-            Thread.sleep(50);
-        }
-        robot.Movement(0.2,-0.8,-0.8,0.2);
-        Thread.sleep(600);
-        robot.Movement(0,0,0,0);
-
-        //goToWayPoint(-0.18,-0.95, -90,1.5,90, 0.02,1,5);
-
-        threadFinished = false;
-        DropShipmentV2();
-        while (!threadFinished){}
-
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.85, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
-
-        robot.Movement(0.4,-0.4,-0.4,0.4);
-        Thread.sleep(750);
-        robot.Movement(0,0,0,0);
-
-
-        while (opModeIsActive()) {
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-
-
-            robotPos = positionEstimation.getRobotPos();
-            telemetry.addData("Detect Position",  "at %d",posFlag);
-            telemetry.addData("RobotPos",  "at %5f :%5f:%5f",
-                    robotPos[0], robotPos[1], robotPos[2] * 180 / Math.PI);
-            telemetry.addData("Debug",  "at %5f",
-                    positionControl.debug_task());
-            if (this.positionControl.checkTaskDone()){
-                telemetry.addData("Task", "Done");
-            }
-            telemetry.update();
-        }
-
-
-        this.positionControl.stopRobot();
     }
 
     /****************************************************************************
@@ -367,7 +229,7 @@ public class Position_Linear extends LinearOpMode {
         targetPos[2] = angle * Math.PI / 180; // Math.PI /2;   //heading, radian
         this.positionControl.goToTargetPosition(targetPos, vel,vw * Math.PI / 180, disRes,angleRes);
         float a = 0;
-        while(!this.positionControl.checkTaskDone() && a < timeLimit * 40 && opModeIsActive()){
+        while(!this.positionControl.checkTaskDone() && a < timeLimit * 40){
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             robotPos = positionEstimation.getRobotPos();
             telemetry.addData("RobotPos",  "at %5f :%5f:%5f",
@@ -381,7 +243,7 @@ public class Position_Linear extends LinearOpMode {
             a++;
             Thread.sleep(25);
         }
-        positionControl.SetTaskDone();
+        //positionControl.SetTaskDone();
         Thread.sleep(50);
     }
 
@@ -417,43 +279,51 @@ public class Position_Linear extends LinearOpMode {
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 
-    void DropShipmentV2() throws InterruptedException {
+    void DropShipmentV2(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-        goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.15, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
+                    goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.15, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
 
-        while(robot.colorSensor.red() < 600){
-            robot.Movement(-0.4,-0.6, -0.6, -0.4);
-        }
-        robot.Movement(0,0,0,0);
-        robot.Arm_H.setTargetPosition(3100);
-        robot.Arm_H.setPower(1.0);
-        robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        ArmExtendDelay(500,2400);
+                    while(robot.colorSensor.red() < 600){
+                        robot.Movement(-0.8,-0.8, -0.8, -0.6);
+                    }
+                    robot.Movement(0,0,0,0);
+                    robot.Arm_H.setTargetPosition(3100);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.Arm_E.setTargetPosition(2400);
+                    robot.Arm_E.setPower(0.8);
+                    robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        goToWayPoint(robotPos[0], robotPos[1] + 0.47, RadtoDeg(robotPos[2]), 2.25, 90, 0.1, 1,3);
+                    goToWayPoint(robotPos[0], robotPos[1] + 0.47, RadtoDeg(robotPos[2]), 2.5, 90, 0.1, 1,3);
 
-        goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.6, RadtoDeg(robotPos[2]) + 90, 2.25, 120, 0.02, 1,1.75);
+                    goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.57, RadtoDeg(robotPos[2]) + 90, 2.5, 360, 0.02, 1,3);
 
-        robot.Intake1.setPower(-0.8);
-        robot.Intake2.setPower(-0.8);
-        Thread.sleep(500);
-        robot.Intake1.setPower(0);
-        robot.Intake2.setPower(0);
-        robot.Arm_E.setTargetPosition(0);
-        robot.Arm_E.setPower(1);
-        robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        ArmDelay(800,PICK_POSITION);
-        goToWayPoint(robotPos[0] - 0.15, robotPos[1] - 0.50, RadtoDeg(robotPos[2]) - 90, 2.25, 360, 0.1, 4,3);
-        robot.Intake1.setPower(1.0);
-        robot.Intake2.setPower(1.0);
-
-//                    robot.Movement(0.6,0.8,0.8,0.6);
-//                    Thread.sleep(800);
-//                    robot.Movement(0,0,0,0);
-        threadFinished = true;
-        positionControl.InterruptThread();
+                    robot.Intake1.setPower(-0.8);
+                    robot.Intake2.setPower(-0.8);
+                    Thread.sleep(500);
+                    robot.Intake1.setPower(0);
+                    robot.Intake2.setPower(0);
+                    robot.Arm_E.setTargetPosition(0);
+                    robot.Arm_E.setPower(1);
+                    robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    ArmDelay(800,PICK_POSITION);
+                    goToWayPoint(robotPos[0] - 0.15, robotPos[1] - 0.50, RadtoDeg(robotPos[2]) - 90, 2.5, 360, 0.1, 4,3);
+                    robot.Intake1.setPower(1.0);
+                    robot.Intake2.setPower(1.0);
+                    goToWayPoint(robotPos[0] - 0.05, robotPos[1] - 0.78, RadtoDeg(robotPos[2]), 2.5, 180, 0.1, 4,3);
 
 
+                    positionControl.InterruptThread();
+
+                } catch (InterruptedException e) {
+
+                }
+            }
+        }).start();
     }
 
     void ArmDelay(long delay, int position){
@@ -465,23 +335,6 @@ public class Position_Linear extends LinearOpMode {
                     robot.Arm_H.setTargetPosition(position);
                     robot.Arm_H.setPower(1.0);
                     robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }).start();
-    }
-
-    void ArmExtendDelay(long delay, int position){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(delay);
-                    robot.Arm_E.setTargetPosition(position);
-                    robot.Arm_E.setPower(0.8);
-                    robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

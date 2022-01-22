@@ -34,6 +34,7 @@ public class MecanumRobotDrive {
     public ColorSensor blockSensor;
 
     public Servo hookServo = null;
+    public Servo wingServo = null;
 
     int initArmE = 0;
     int initArmH = 0;
@@ -46,10 +47,15 @@ public class MecanumRobotDrive {
 
     public MecanumRobotDrive(HardwareMap hw){
         hardwareMap = hw;
-        init();
+        init(true);
     }
 
-    public void init(){
+    public MecanumRobotDrive(HardwareMap hw, boolean reset){
+        hardwareMap = hw;
+        init(reset);
+    }
+
+    public void init(boolean reset){
         lf  = hardwareMap.get(DcMotor.class, "L1");
         lr = hardwareMap.get(DcMotor.class, "L2");
         rf  = hardwareMap.get(DcMotor.class, "R1");
@@ -74,24 +80,27 @@ public class MecanumRobotDrive {
         Arm_H = hardwareMap.get(DcMotor.class, "Arm_H");
         Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Arm_H.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        int arm_H_Position = Arm_H.getCurrentPosition();
-        Arm_H.setPower(-1.0);
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        while(Math.abs(Arm_H.getCurrentPosition() - arm_H_Position) > 10){
-            arm_H_Position = Arm_H.getCurrentPosition();
+
+        if(reset){
+            int arm_H_Position = Arm_H.getCurrentPosition();
+            Arm_H.setPower(-1.0);
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            while(Math.abs(Arm_H.getCurrentPosition() - arm_H_Position) > 10){
+                arm_H_Position = Arm_H.getCurrentPosition();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
+            }
+            Arm_H.setPower(0.0);
+            Arm_H.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
-        Arm_H.setPower(0.0);
-        Arm_H.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         colorSensor = hardwareMap.colorSensor.get("colour");
         blockSensor = hardwareMap.colorSensor.get("block");
@@ -113,8 +122,6 @@ public class MecanumRobotDrive {
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-
         // Tell the driver that initialization is complete.
         Arm_E.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         initArmE = Arm_E.getCurrentPosition();
@@ -122,6 +129,9 @@ public class MecanumRobotDrive {
 
         hookServo = hardwareMap.get(Servo.class, "Hook");
         hookServo.setPosition(1.0);   //1.0 reset  //0.5 close, //open 0.75
+
+        wingServo = hardwareMap.get(Servo.class, "Wing");
+        wingServo.setPosition(0.1);
 
         //please keep the robtot still to reset IMU
         try {

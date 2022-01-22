@@ -27,8 +27,8 @@ public class PositionControl {
     private final double MAX_ANGLEACCEL = 0.2;  //
     private final double MAX_VD = 2.59;        //2.59m/s for 1150 RPM(ratio 2:1) 1.8 for 435rpm only for theory, on floor, it only around 85%, so not set vel over 1.8m/s.  0.096 diameter of wheel 2.18 m/s = 435 /60 * PI * 0.096  1.568 m/s = 312/60 * PI * 0.096
     private final double MAX_VW = 2 * Math.PI;          // 1 round per second 360 degree per second
-    private final double MIN_VD = 0.15;          // 0.2m/s if kpd = 2, it means in 10 cmd it will drive in min speed
-    private final double MIN_VW = 20 * Math.PI /180;          // 10 degree per second
+    private final double MIN_VD = 0.25;          // 0.2m/s if kpd = 2, it means in 10 cmd it will drive in min speed
+    private final double MIN_VW = 15 * Math.PI /180;          // 10 degree per second
     private final double DIS_DEADBAND = 0.02;                   // 2 cm
     private final double ANGLE_DEADBAND = 2.0 / 180 * Math.PI;  // 1 degree error
     //private double kpd = 2.0;
