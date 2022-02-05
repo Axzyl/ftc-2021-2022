@@ -29,32 +29,25 @@
 
 package org.firstinspires.ftc.teamcode.samples;
 
-import android.util.Log;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.MecanumRobotDrive;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 // 2021 game, autonomous code
 
-@Autonomous(name="AutoCompetition1", group="Linear Opmode")
+@Autonomous(name="AutoCompetition3", group="Linear Opmode")
 //@Disabled
-public class Position_Linear extends LinearOpMode {
+public class Position_Linear_3 extends LinearOpMode {
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains
      * the following 4 detectable objects
      *  0: Ball,
@@ -221,7 +214,7 @@ public class Position_Linear extends LinearOpMode {
         //<-----------------------------------------
         //                  |
         //                  |(X-)
-        posFlag = 1;  //just for debug
+        //posFlag = 1;  //just for debug
 
         if(!opModeIsActive()) stop();
 
@@ -271,7 +264,7 @@ public class Position_Linear extends LinearOpMode {
         robot.Arm_E.setTargetPosition(0);
         robot.Arm_E.setPower(0.6);
         robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        goToWayPoint(0.13,1.4, -90,2,180, 0.02,1,3.5);
+        goToWayPoint(0.12,1.4, -90,2,180, 0.02,1,3.5);
         robot.Movement(0.1,-0.3,-0.3,0.1);
         Thread.sleep(1000);
         robot.Movement(0,0,0,0);
@@ -300,7 +293,7 @@ public class Position_Linear extends LinearOpMode {
         DropShipmentV2();
         while (!threadFinished){}
 
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.95, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
+        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.9, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
 
         Thread.sleep(250);
 
@@ -317,7 +310,7 @@ public class Position_Linear extends LinearOpMode {
         DropShipmentV2();
         while (!threadFinished){}
 
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.86, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
+        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.85, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
 
         robot.Movement(0.4,-0.4,-0.4,0.4);
         Thread.sleep(750);
@@ -414,7 +407,7 @@ public class Position_Linear extends LinearOpMode {
 
     void DropShipmentV2() throws InterruptedException {
 
-        goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.10, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
+        goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.15, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
 
         while(robot.colorSensor.red() < 600){
             robot.Movement(-0.4,-0.6, -0.6, -0.4);
@@ -427,7 +420,7 @@ public class Position_Linear extends LinearOpMode {
 
         goToWayPoint(robotPos[0], robotPos[1] + 0.47, RadtoDeg(robotPos[2]), 2.25, 90, 0.1, 1,3);
 
-        goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.6, RadtoDeg(robotPos[2]) + 90, 2.25, 120, 0.04, 2,1.75);
+        goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.6, RadtoDeg(robotPos[2]) + 90, 2.25, 120, 0.02, 1,1.75);
 
         robot.Intake1.setPower(-0.8);
         robot.Intake2.setPower(-0.8);

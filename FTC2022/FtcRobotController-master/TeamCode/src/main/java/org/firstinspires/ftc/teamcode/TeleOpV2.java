@@ -209,7 +209,12 @@ public class TeleOpV2 extends OpMode
 
             }
             else{
-                robot.Arm_E.setPower(0);
+                if(robot.Arm_E.getCurrentPosition() < 300 && robot.Arm_E.getCurrentPosition() > 20){
+                    robot.Arm_E.setPower(-0.5);
+                }
+                else{
+                    robot.Arm_E.setPower(0);
+                }
 //            robot.Arm_E.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
@@ -383,7 +388,7 @@ public class TeleOpV2 extends OpMode
 //        telemetry.addData("Object Position", "Pos ID = " + (objectPos));
 //        telemetry.addData("Motor Encoder", "Arm Extend Encoder  = " + (robot.Arm_E.getCurrentPosition()));
 //        telemetry.addData("Motor Encoder", "Arm Height Encoder  = " + (robot.Arm_H.getCurrentPosition()));
-//        telemetry.addData("Robot Angle", "Angle = " + (robotPos[2]));
+        telemetry.addData("Robot Angle", "Angle = " + (robotPos[2]));
 ////        telemetry.addData("Motor Encoder", "Arm Encoder  = " + (robot.Arm_H.getCurrentPosition()));
 //        telemetry.addData("Color",  "at %d:%d:%d",robot.colorSensor.red(), robot.colorSensor.green(), robot.colorSensor.blue());
         telemetry.addData("Block",  "at %d:%d:%d",robot.blockSensor.red(), robot.blockSensor.green(), robot.blockSensor.blue());
@@ -424,7 +429,7 @@ public class TeleOpV2 extends OpMode
                     ArmExtendDelay(500,2400);
 
                     if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]),
-                            2.25, 60, 0.1, 1,2, true)) {
+                            2.25, 60, 0.1, 0.25,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
@@ -445,7 +450,6 @@ public class TeleOpV2 extends OpMode
                     }
                     posOffset[0] = (robotPos[0] - currentPos[0]) + prevOffset[0];
                     posOffset[1] = (robotPos[1] - currentPos[1]) + prevOffset[1];
-                    targetHeight = robot.Arm_H.getCurrentPosition();
                     speedMultiplier = 0.7;
 
                     robot.Intake1.setPower(-0.8);
@@ -457,7 +461,7 @@ public class TeleOpV2 extends OpMode
                     robot.Arm_E.setPower(1);
                     robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmDelay(650,PICK_POSITION);
-                    if(goToWayPoint(robotPos[0] + 0.46, robotPos[1] - 0.17, RadtoDeg(robotPos[2]) - 91,
+                    if(goToWayPoint(robotPos[0] + 0.46, robotPos[1] - 0.17, RadtoDeg(robotPos[2]) - 90,
                             2.25, 360, 0.1, 4,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
@@ -517,8 +521,8 @@ public class TeleOpV2 extends OpMode
                     robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmExtendDelay(500,2400);
 
-                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]),
-                            2.25, 60, 0.1, 1,2, true)) {
+                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]) + 1,
+                            2.25, 60, 0.1, 0.25,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         objPosRun = false;
@@ -549,7 +553,7 @@ public class TeleOpV2 extends OpMode
                         robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         ArmDelay(500,0);
                         Thread.sleep(750);
-                        if(goToWayPoint(robotPos[0] - 0.07, robotPos[1] + 0.4, RadtoDeg(robotPos[2]) - 91,
+                        if(goToWayPoint(robotPos[0] - 0.07, robotPos[1] + 0.33, RadtoDeg(robotPos[2]) - 91,
                                 1.5, 120, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
@@ -579,7 +583,7 @@ public class TeleOpV2 extends OpMode
                         Thread.sleep(1500);
 
                         if(goToWayPoint(robotPos[0], robotPos[1] + 0.05, RadtoDeg(robotPos[2]) + 90,
-                                1.5, 270, 0.02, 1,5, true)) {
+                                1.5, 270, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
                             objPosRun = false;
@@ -592,7 +596,7 @@ public class TeleOpV2 extends OpMode
                         robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         ArmDelay(500,0);
                         Thread.sleep(750);
-                        if(goToWayPoint(robotPos[0] + 0.03, robotPos[1] + 0.4, RadtoDeg(robotPos[2]) - 91,
+                        if(goToWayPoint(robotPos[0] + 0.03, robotPos[1] + 0.33, RadtoDeg(robotPos[2]) - 91,
                                 1.5, 120, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
@@ -622,7 +626,7 @@ public class TeleOpV2 extends OpMode
                         Thread.sleep(1500);
 
                         if(goToWayPoint(robotPos[0] - 0.25, robotPos[1] - 0.02, RadtoDeg(robotPos[2]) + 90,
-                                1.5, 270, 0.02, 1,5, true)) {
+                                1.5, 270, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
                             objPosRun = false;
@@ -635,7 +639,7 @@ public class TeleOpV2 extends OpMode
                         robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         ArmDelay(500,0);
                         Thread.sleep(750);
-                        if(goToWayPoint(robotPos[0] + 0.20, robotPos[1] + 0.4, RadtoDeg(robotPos[2]) - 91,
+                        if(goToWayPoint(robotPos[0] + 0.20, robotPos[1] + 0.33, RadtoDeg(robotPos[2]) - 91,
                                 1.5, 120, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
@@ -664,7 +668,7 @@ public class TeleOpV2 extends OpMode
                         Thread.sleep(1500);
 
                         if(goToWayPoint(robotPos[0] - 0.40, robotPos[1] + 0.05, RadtoDeg(robotPos[2]) + 90,
-                                1.5, 270, 0.02, 1,5, true)) {
+                                1.5, 270, 0.02, 1,2, true)) {
                             runningThread = false;
                             armPositinCtrl = false;
                             objPosRun = false;
