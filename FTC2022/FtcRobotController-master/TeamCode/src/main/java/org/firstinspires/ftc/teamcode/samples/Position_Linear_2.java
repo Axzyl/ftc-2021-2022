@@ -29,19 +29,26 @@
 
 package org.firstinspires.ftc.teamcode.samples;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.MecanumRobotDrive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 // 2021 game, autonomous code
 
@@ -214,7 +221,7 @@ public class Position_Linear_2 extends LinearOpMode {
         //<-----------------------------------------
         //                  |
         //                  |(X-)
-        //posFlag = 1;  //just for debug
+        posFlag = 2;  //just for debug
 
         if(!opModeIsActive()) stop();
 
@@ -223,10 +230,11 @@ public class Position_Linear_2 extends LinearOpMode {
             robot.Arm_H.setPower(1.0);
             robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             //while(robot.Arm_H.getCurrentPosition() < LEVEL1_POSITION - 1600){}
-            robot.Arm_E.setTargetPosition(400);
+            robot.Arm_E.setTargetPosition(600);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.47,0.1, 0.0,0.8,90, 0.04,1,1.75);
+            Log.d("PosFlag","1");
+            goToWayPoint(0.44,0.1, 0.0,0.8,90, 0.05,3,1.5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
@@ -239,7 +247,8 @@ public class Position_Linear_2 extends LinearOpMode {
             robot.Arm_E.setTargetPosition(700);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.40,0.1, 0.0,0.8,90, 0.04,1,1.75);
+            Log.d("PosFlag","2");
+            goToWayPoint(0.40,0.1, 0.0,0.8,90, 0.05,3,1.5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
@@ -252,26 +261,28 @@ public class Position_Linear_2 extends LinearOpMode {
             robot.Arm_E.setTargetPosition(800);
             robot.Arm_E.setPower(0.6);
             robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            goToWayPoint(0.50,0.1, 0.0,0.8,90, 0.04,1,1.75);
+            Log.d("PosFlag","3");
+            goToWayPoint(0.50,0.1, 0.0,0.8,90, 0.05,3,1.5);
             robot.Movement(0,0,0,0);
             robot.Intake1.setPower(-0.8);
             robot.Intake2.setPower(-0.8);
         }
 
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         robot.Intake1.setPower(0);
         robot.Intake2.setPower(0);
         robot.Arm_E.setTargetPosition(0);
         robot.Arm_E.setPower(0.6);
         robot.Arm_E.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        goToWayPoint(0.12,1.4, -90,2,180, 0.02,1,3.5);
-        robot.Movement(0.1,-0.3,-0.3,0.1);
-        Thread.sleep(1000);
+        goToWayPoint(0.25,1.4, -90,2,180, 0.02,1,3.5);
+        robot.Movement(0.13,-0.35,-0.35,0.13);
+
+        Thread.sleep(750);
         robot.Movement(0,0,0,0);
         //positionEstimation.ResetAll();
         //goToWayPoint(-0.42,0, -90,0.8,90, 0.02,1);
-        robot.CM.setPower(-0.25);
-        Thread.sleep(2500);
+        robot.CM.setPower(-0.23);
+        Thread.sleep(2750);
         robot.CM.setPower(0);
 
         robot.Intake1.setPower(1);
@@ -279,10 +290,9 @@ public class Position_Linear_2 extends LinearOpMode {
         robot.Arm_H.setTargetPosition(PICK_POSITION);
         robot.Arm_H.setPower(1.0);
         robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        goToWayPoint(-0.14,-0.92, -95,2.25,90, 0.02,1,3);
-
-        int a = 0;
-        robot.Movement(0.3, 0.3, 0.3, 0.3);
+        goToWayPoint(0.30,1.08, -90,2.25,90, 0.08,3,2);
+        goToWayPoint(-0.05,0.20, -90,2.25,90, 0.03,3,2);
+        goToWayPoint(-0.13,-0.94, -93,2.25,90, 0.03,1,2);
 
         robot.Movement(0.2,-0.8,-0.8,0.2);
         Thread.sleep(350);
@@ -293,12 +303,9 @@ public class Position_Linear_2 extends LinearOpMode {
         DropShipmentV2();
         while (!threadFinished){}
 
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.9, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
+        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.90, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
 
         Thread.sleep(250);
-
-        a = 0;
-        robot.Movement(0.3, 0.3, 0.3, 0.3);
 
         robot.Movement(0.2,-0.8,-0.8,0.2);
         Thread.sleep(600);
@@ -310,7 +317,7 @@ public class Position_Linear_2 extends LinearOpMode {
         DropShipmentV2();
         while (!threadFinished){}
 
-        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.85, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
+        goToWayPoint(robotPos[0] - 0.07, robotPos[1] - 0.66, RadtoDeg(robotPos[2]), 2.25, 180, 0.1, 8,2);
 
         robot.Movement(0.4,-0.4,-0.4,0.4);
         Thread.sleep(750);
@@ -373,6 +380,30 @@ public class Position_Linear_2 extends LinearOpMode {
         Thread.sleep(50);
     }
 
+    private void goToWayPoint(double x, double y, double angle, double vel, double vw, double disRes, double angleRes, double timeLimit, boolean brake) throws InterruptedException {
+        targetPos[0] = x;//1.5;  //x
+        targetPos[1] = y;//-0.6;   //y
+        targetPos[2] = angle * Math.PI / 180; // Math.PI /2;   //heading, radian
+        this.positionControl.goToTargetPosition(targetPos, vel,vw * Math.PI / 180, disRes,angleRes,brake);
+        float a = 0;
+        while(!this.positionControl.checkTaskDone() && a < timeLimit * 40 && opModeIsActive()){
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            robotPos = positionEstimation.getRobotPos();
+            telemetry.addData("RobotPos",  "at %5f :%5f:%5f",
+                    robotPos[0], robotPos[1], robotPos[2] * 180 / Math.PI);
+            telemetry.addData("Debug",  "at %5f",
+                    positionControl.debug_task());
+            if (this.positionControl.checkTaskDone()){
+                telemetry.addData("Task", "Done");
+            }
+            telemetry.update();
+            a++;
+            Thread.sleep(25);
+        }
+        positionControl.SetTaskDone();
+        Thread.sleep(50);
+    }
+
     /**
      * Initialize the Vuforia localization engine.
      */
@@ -407,20 +438,21 @@ public class Position_Linear_2 extends LinearOpMode {
 
     void DropShipmentV2() throws InterruptedException {
 
-        goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.15, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
+        goToWayPoint(robotPos[0] - 0.05, robotPos[1] + 0.10, RadtoDeg(robotPos[2]), 2, 90, 0.04, 1,3);
 
-        while(robot.colorSensor.red() < 600){
-            robot.Movement(-0.4,-0.6, -0.6, -0.4);
-        }
         robot.Movement(0,0,0,0);
         robot.Arm_H.setTargetPosition(3100);
         robot.Arm_H.setPower(1.0);
         robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ArmExtendDelay(500,2400);
 
+        while(robot.colorSensor.red() < 300){
+            robot.Movement(-0.4,-0.6, -0.6, -0.4);
+        }
+
         goToWayPoint(robotPos[0], robotPos[1] + 0.47, RadtoDeg(robotPos[2]), 2.25, 90, 0.1, 1,3);
 
-        goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.6, RadtoDeg(robotPos[2]) + 90, 2.25, 120, 0.02, 1,1.75);
+        goToWayPoint(robotPos[0] + 0.10, robotPos[1] + 0.6, RadtoDeg(robotPos[2]) + 90, 2.25, 120, 0.04, 2,1.75);
 
         robot.Intake1.setPower(-0.8);
         robot.Intake2.setPower(-0.8);

@@ -76,7 +76,9 @@ public class TeleOpV2 extends OpMode
     boolean runningThread = false;
     boolean objPosRun = false;
     int objectPos = 1;
-    int targetHeight = 3150;
+    int targetHeight = 3250;
+    double carouselPower = 0.25;
+    boolean carouselThreadRunning = false;
 
     double[] posOffset = new double[2];
 
@@ -96,6 +98,7 @@ public class TeleOpV2 extends OpMode
 
     private boolean btnStartRelease = true;
     private int hookPosID = 0;
+    boolean speedToggle = false;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -211,6 +214,7 @@ public class TeleOpV2 extends OpMode
             else{
                 if(robot.Arm_E.getCurrentPosition() < 300 && robot.Arm_E.getCurrentPosition() > 20){
                     robot.Arm_E.setPower(-0.5);
+
                 }
                 else{
                     robot.Arm_E.setPower(0);
@@ -249,7 +253,7 @@ public class TeleOpV2 extends OpMode
             else if(gamepad1.dpad_left){
                 if(!dpadClick && !runningThread){
 
-                    EndgameThread();
+                    EndgameCarouselThread();
                     clicking = true;
 //                    robot.Arm_H.setTargetPosition(LEVEL2_POSITION);
 //                    robot.Arm_H.setPower(1.0);
@@ -287,25 +291,25 @@ public class TeleOpV2 extends OpMode
 
             //left/right trigger button manually control, need set position to protect
             if(gamepad1.left_trigger > 0.5){
-                if (robot.Arm_H.getCurrentPosition() < 3800){
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.Arm_H.setPower(1.0);
-                }
-                else{
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.Arm_H.setPower(0.0);
-                }
+//                if (robot.Arm_H.getCurrentPosition() < 3800){
+//                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    robot.Arm_H.setPower(1.0);
+//                }
+//                else{
+//                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    robot.Arm_H.setPower(0.0);
+//                }
                 armPositinCtrl = false;
             }
             else if (gamepad1.right_trigger > 0.5){
-                if (robot.Arm_H.getCurrentPosition() > 5){
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.Arm_H.setPower(-1.0);
-                }
-                else{
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.Arm_H.setPower(0.0);
-                }
+//                if (robot.Arm_H.getCurrentPosition() > 5){
+//                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    robot.Arm_H.setPower(-1.0);
+//                }
+//                else{
+//                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    robot.Arm_H.setPower(0.0);
+//                }
                 armPositinCtrl = false;
             }
             else{
@@ -346,19 +350,20 @@ public class TeleOpV2 extends OpMode
             }
         }
         else if(gamepad1.y){
-            if(!clicking && !runningThread && robot.blockSensor.red() > 150){
+            if(!clicking && !runningThread){
                 DropShipmentV2();
                 clicking = true;
             }
-
-            if(!clicking && runningThread){
-                clicking = true;
-                try {
-                    throw new InterruptedException("Interrupt");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+        }
+        else if(gamepad1.b && gamepad1.dpad_left){
+//            if(!clicking && runningThread){
+//                clicking = true;
+//                try {
+//                    throw new InterruptedException("Interrupt");
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         else{
             clicking = false;
@@ -390,7 +395,7 @@ public class TeleOpV2 extends OpMode
 //        telemetry.addData("Motor Encoder", "Arm Height Encoder  = " + (robot.Arm_H.getCurrentPosition()));
         telemetry.addData("Robot Angle", "Angle = " + (robotPos[2]));
 ////        telemetry.addData("Motor Encoder", "Arm Encoder  = " + (robot.Arm_H.getCurrentPosition()));
-//        telemetry.addData("Color",  "at %d:%d:%d",robot.colorSensor.red(), robot.colorSensor.green(), robot.colorSensor.blue());
+        telemetry.addData("Color",  "at %d:%d:%d",robot.colorSensor.red(), robot.colorSensor.green(), robot.colorSensor.blue());
         telemetry.addData("Block",  "at %d:%d:%d",robot.blockSensor.red(), robot.blockSensor.green(), robot.blockSensor.blue());
 ////        telemetry.addData("Position", "X = " + robotPos[0] + " | Y: " + robotPos[1] + " | Rot: " + robotPos[2]);
 //        telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -414,28 +419,30 @@ public class TeleOpV2 extends OpMode
 //                        armPositinCtrl = false;
 //                        return;
 //                    }
-                    while(robot.colorSensor.red() < 600){
-                        robot.Movement(-0.15,-0.6, -0.6, -0.15);
-                        if(gamepad1.y){
-                            runningThread = false;
-                            armPositinCtrl = false;
-                            return;
-                        }
-                    }
+
                     robot.Movement(0,0,0,0);
                     robot.Arm_H.setTargetPosition(targetHeight);
                     robot.Arm_H.setPower(1.0);
                     robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     ArmExtendDelay(500,2400);
 
-                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]),
-                            2.25, 60, 0.1, 0.25,2, true)) {
+                    while(robot.colorSensor.red() < 300){
+                        robot.Movement(-0.5,-0.6, -0.6, -0.5);
+                        if(gamepad1.b){
+                            runningThread = false;
+                            armPositinCtrl = false;
+                            return;
+                        }
+                    }
+
+                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]) + 3,
+                            2.25, 10, 0.1, 2,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] - 0.61 + posOffset[0], robotPos[1] + 0.10 + posOffset[1], RadtoDeg(robotPos[2]) + 90,
-                            1.5, 120, 0.02, 1,1.5, true)) {
+                    if(goToWayPoint(robotPos[0] - 0.61, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90,
+                            2.25, 120, 0.04, 2,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
@@ -445,9 +452,17 @@ public class TeleOpV2 extends OpMode
 
                     double[] currentPos = robotPos.clone();
                     double[] prevOffset = posOffset.clone();
-                    while(!gamepad1.a){
-                        ManualAdjustment();
+                    speedMultiplier = 0.25;
+                    while(!gamepad1.a && !gamepad1.b){
+                        ManualAdjustment(true);
                     }
+
+                    if(gamepad1.b){
+                        runningThread = false;
+                        armPositinCtrl = false;
+                        return;
+                    }
+
                     posOffset[0] = (robotPos[0] - currentPos[0]) + prevOffset[0];
                     posOffset[1] = (robotPos[1] - currentPos[1]) + prevOffset[1];
                     speedMultiplier = 0.7;
@@ -467,12 +482,12 @@ public class TeleOpV2 extends OpMode
                         armPositinCtrl = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] + 0.59, robotPos[1] - 0.07, RadtoDeg(robotPos[2]),
-                            2.25, 180, 0.1, 4, 2, true)) {
-                        runningThread = false;
-                        armPositinCtrl = false;
-                        return;
-                    }
+//                    if(goToWayPoint(robotPos[0] + 0.59, robotPos[1] - 0.08, RadtoDeg(robotPos[2]),
+//                            2.25, 180, 0.1, 4, 2, true)) {
+//                        runningThread = false;
+//                        armPositinCtrl = false;
+//                        return;
+//                    }
                     robot.Intake1.setPower(1.0);
                     robot.Intake2.setPower(1.0);
                     positionControl.InterruptThread();
@@ -502,9 +517,17 @@ public class TeleOpV2 extends OpMode
 //                        armPositinCtrl = false;
 //                        return;
 //                    }
-                    while(robot.colorSensor.red() < 600){
-                        robot.Movement(-0.15,-0.6, -0.6, -0.15);
-                        if(gamepad1.y){
+
+                    robot.hookServo.setPosition(0.75);
+                    robot.Movement(0,0,0,0);
+                    robot.Arm_H.setTargetPosition(targetHeight);
+                    robot.Arm_H.setPower(1.0);
+                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    ArmExtendDelay(500,2400);
+
+                    while(robot.colorSensor.red() < 300){
+                        robot.Movement(-0.5,-0.6, -0.6, -0.5);
+                        if(gamepad1.b){
                             runningThread = false;
                             armPositinCtrl = false;
                             objPosRun = false;
@@ -514,31 +537,32 @@ public class TeleOpV2 extends OpMode
 
                     double startPosY = robotPos[1];
 
-                    robot.hookServo.setPosition(0.75);
-                    robot.Movement(0,0,0,0);
-                    robot.Arm_H.setTargetPosition(targetHeight);
-                    robot.Arm_H.setPower(1.0);
-                    robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    ArmExtendDelay(500,2400);
+                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]) + 3,
+                            2.25, 10, 0.1, 2,2, true)) {
+                        runningThread = false;
+                        armPositinCtrl = false;
+                        return;
+                    }
 
-                    if(goToWayPoint(robotPos[0] - 0.47, robotPos[1], RadtoDeg(robotPos[2]) + 1,
-                            2.25, 60, 0.1, 0.25,2, true)) {
+                    if(goToWayPoint(robotPos[0] - 0.61, robotPos[1] + 0.10, RadtoDeg(robotPos[2]) + 90,
+                            2.25, 120, 0.04, 2,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
-                        objPosRun = false;
                         return;
                     }
-                    if(goToWayPoint(robotPos[0] - 0.61 + posOffset[0], robotPos[1] + 0.10 + posOffset[1], RadtoDeg(robotPos[2]) + 90,
-                            1.5, 120, 0.02, 1,2, true)) {
-                        runningThread = false;
-                        armPositinCtrl = false;
-                        objPosRun = false;
-                        return;
-                    }
+
                     positionControl.SetTaskDone();
-                    while(!gamepad1.a){
-                        ManualAdjustment();
+                    speedMultiplier = 0.25;
+                    while(!gamepad1.a && !gamepad1.b){
+                        ManualAdjustment(true);
                     }
+
+                    if(gamepad1.b){
+                        runningThread = false;
+                        armPositinCtrl = false;
+                        return;
+                    }
+
                     speedMultiplier = 0.7;
 
                     robot.Intake1.setPower(-0.8);
@@ -546,6 +570,7 @@ public class TeleOpV2 extends OpMode
                     Thread.sleep(500);
                     robot.Intake1.setPower(0);
                     robot.Intake2.setPower(0);
+                    robot.CM.setPower(0);
 
                     if(objectPos == 1){
                         robot.Arm_E.setTargetPosition(0);
@@ -570,8 +595,9 @@ public class TeleOpV2 extends OpMode
                         }
 
                         positionControl.SetTaskDone();
+                        speedMultiplier = 0.25;
                         while(!gamepad1.a){
-                            ManualAdjustment();
+                            ManualAdjustment(true);
                         }
                         speedMultiplier = 0.7;
 
@@ -613,8 +639,9 @@ public class TeleOpV2 extends OpMode
                         }
 
                         positionControl.SetTaskDone();
+                        speedMultiplier = 0.25;
                         while(!gamepad1.a){
-                            ManualAdjustment();
+                            ManualAdjustment(true);
                         }
                         speedMultiplier = 0.7;
 
@@ -655,8 +682,9 @@ public class TeleOpV2 extends OpMode
                             return;
                         }
                         positionControl.SetTaskDone();
+                        speedMultiplier = 0.25;
                         while(!gamepad1.a){
-                            ManualAdjustment();
+                            ManualAdjustment(true);
                         }
                         speedMultiplier = 0.7;
 
@@ -678,8 +706,9 @@ public class TeleOpV2 extends OpMode
                     }
 
                     positionControl.SetTaskDone();
+                    speedMultiplier = 0.25;
                     while(!gamepad1.a){
-                        ManualAdjustment();
+                        ManualAdjustment(true);
                     }
                     speedMultiplier = 0.7;
 
@@ -694,7 +723,7 @@ public class TeleOpV2 extends OpMode
                     robot.Arm_H.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Thread.sleep(500);
                     if(goToWayPoint(robotPos[0], robotPos[1] - 0.25, RadtoDeg(robotPos[2]),
-                            1.5, 90, 0.02, 1,2, true)) {
+                            1.5, 90, 0.1, 1,2, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         objPosRun = false;
@@ -704,46 +733,66 @@ public class TeleOpV2 extends OpMode
                     ArmDelay(500,0);
                     ArmExtendDelay(0,0);
 
-                    if(goToWayPoint(robotPos[0] - 1.28, startPosY + 0.4, RadtoDeg(robotPos[2]) - 90,
-                            2, 180, 0.05, 1,3, true)) {
-                        runningThread = false;
-                        armPositinCtrl = false;
-                        objPosRun = false;
-                        return;
-                    }
+//                    if(goToWayPoint(robotPos[0] - 1.28, startPosY + 0.3, RadtoDeg(robotPos[2]) - 90,
+//                            2, 180, 0.05, 1,3, true)) {
+//                        runningThread = false;
+//                        armPositinCtrl = false;
+//                        objPosRun = false;
+//                        return;
+//                    }
                     positionControl.SetTaskDone();
-                    robot.Movement(-0.3,-0.4,-0.4,-0.3);
-                    Thread.sleep(500);
-                    while(!gamepad1.a){
-                        ManualAdjustment();
-                    }
+//                    robot.Movement(-0.3,-0.4,-0.4,-0.3);
+//                    Thread.sleep(500);
                     speedMultiplier = 0.7;
-                    robot.wingServo.setPosition(0.7);
-                    for(int i = 0; i < 8; i++){
-                        robot.CM.setPower(-0.25);
-                        Thread.sleep(1500);
-                        robot.CM.setPower(0);
-                        Thread.sleep(750);
+                    while(!gamepad1.a){
+                        ManualAdjustment(true);
                     }
+
+                    carouselThreadRunning = true;
+                    CarouselThread();
+                    robot.wingServo.setPosition(0.7);
+                    speedMultiplier = 0.25;
+                    while(carouselThreadRunning){
+                        boolean dpadClicking = false;
+                        speedMultiplier = 0.25;
+                        ManualAdjustment(true);
+                        if(gamepad1.dpad_up){
+                            if(!dpadClicking){
+                                carouselPower += 0.01;
+                                dpadClicking = true;
+                            }
+
+                        }
+                        else if(gamepad1.dpad_down){
+                            if(!dpadClicking) {
+                                carouselPower -= 0.01;
+                                dpadClicking = true;
+                            }
+                        }
+                        else{
+                            dpadClicking = false;
+                        }
+                    }
+
+                    speedMultiplier = 0.7;
+
 //                    robot.CM.setPower(-0.25);
 //                    Thread.sleep(2000);
 //                    robot.CM.setPower(0);
                     WingDelay(500, 0.2);
-                    if(goToWayPoint(robotPos[0] + 1.4, robotPos[1] - 0.35, RadtoDeg(robotPos[2]),
+                    if(goToWayPoint(robotPos[0] + 1.4, robotPos[1] - 0.30, RadtoDeg(robotPos[2]),
                             2.5, 180, 0.1, 4, 5, true)) {
                         runningThread = false;
                         armPositinCtrl = false;
                         return;
                     }
 
-
-
-                    if(goToWayPoint(robotPos[0] + 1.3, robotPos[1] - 0.05, RadtoDeg(robotPos[2]),
-                            2.5, 180, 0.1, 4, 5, true)) {
-                        runningThread = false;
-                        armPositinCtrl = false;
-                        return;
-                    }
+//                    if(goToWayPoint(robotPos[0] + 1.3, robotPos[1] - 0.05, RadtoDeg(robotPos[2]),
+//                            2.5, 180, 0.1, 4, 5, true)) {
+//                        runningThread = false;
+//                        armPositinCtrl = false;
+//                        return;
+//                    }
 
                     positionControl.InterruptThread();
                     runningThread = false;
@@ -755,56 +804,66 @@ public class TeleOpV2 extends OpMode
         }).start();
     }
 
-    void EndgameThread(){
+    void EndgameCarouselThread(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runningThread = true;
+                carouselThreadRunning = true;
+                CarouselThread();
+                robot.wingServo.setPosition(0.7);
+                while(carouselThreadRunning){
+                    boolean dpadClicking = false;
+                    speedMultiplier = 0.25;
+                    ManualAdjustment(true);
+                    if(gamepad1.dpad_up){
+                        if(!dpadClicking){
+                            carouselPower += 0.01;
+                            dpadClicking = true;
+                        }
+
+                    }
+                    else if(gamepad1.dpad_down){
+                        if(!dpadClicking) {
+                            carouselPower -= 0.01;
+                            dpadClicking = true;
+                        }
+                    }
+                    else{
+                        dpadClicking = false;
+                    }
+                }
+
+                speedMultiplier = 0.7;
+
+//                    robot.CM.setPower(-0.25);
+//                    Thread.sleep(2000);
+//                    robot.CM.setPower(0);
+                WingDelay(500, 0.2);
+                runningThread = false;
+            }
+        }).run();
+
+    }
+
+
+    void CarouselThread(){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    runningThread = true;
-                    armPositinCtrl = true;
-//                    if(goToWayPoint(robotPos[0] - 0.15, robotPos[1]-0.05, RadtoDeg(robotPos[2]),
-//                            2, 90, 0.04, 1,3, true)){
-//                        runningThread = false;
-//                        armPositinCtrl = false;
-//                        return;
-//                    }
-
-//                    while(robot.colorSensor.red() < 350){
-//                        robot.Movement(0.2,-0.4,-0.4,0.2);
-//                        if(gamepad1.y){
-//                            runningThread = false;
-//                            armPositinCtrl = false;
-//                            return;
-//                        }
-//                    }
-//
-//                    if(goToWayPoint(robotPos[0],robotPos[1] - 0.21,robotPos[2],1.5,90,0.02,1,5,true)){
-//                        runningThread = false;
-//                        armPositinCtrl = false;
-//                        return;
-//                    }
-
-                    robot.Movement(0.1,-0.3,-0.3,0.1);
-                    Thread.sleep(1000);
-                    robot.Movement(0,0,0,0);
-
-//                    for(int i = 0; i < 8; i++){
-//                        robot.CM.setPower(-0.25);
-//                        Thread.sleep(1500);
-//                        robot.CM.setPower(0);
-//                        Thread.sleep(750);
-//                    }
-
-                    if(goToWayPoint(robotPos[0] + 1.7, robotPos[1] + 0.35, RadtoDeg(robotPos[2]) + 90,
-                            1.5, 180, 0.1, 4, 5, true)) {
-                        runningThread = false;
-                        armPositinCtrl = false;
-                        return;
+                    for(int i = 0; i < 8; i++){
+                        int time = 0;
+                        while(time < 1500){
+                            robot.CM.setPower(-carouselPower);
+                            Thread.sleep(10);
+                            time += 10;
+                        }
+                        robot.CM.setPower(0);
+                        Thread.sleep(750);
                     }
 
-                    //positionControl.InterruptThread();
-                    runningThread = false;
-                    armPositinCtrl = false;
+                    carouselThreadRunning = false;
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -850,7 +909,7 @@ public class TeleOpV2 extends OpMode
         }).start();
     }
 
-    void ManualAdjustment(){
+    void ManualAdjustment(boolean toggleSpeed){
         double drive  = Math.pow(-gamepad1.left_stick_y, 1);
         double strafe = Math.pow(gamepad1.left_stick_x, 1);
         double twist  = Math.pow(gamepad1.right_stick_x,3);
@@ -872,7 +931,20 @@ public class TeleOpV2 extends OpMode
             for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
         }
 
-        speedMultiplier = 0.25;
+        if(gamepad1.left_stick_button){
+            if(!speedToggle){
+                speedToggle = true;
+                if(speedMultiplier < 0.5){
+                    speedMultiplier = 0.7;
+                }
+                else{
+                    speedMultiplier = 0.25;
+                }
+            }
+        }
+        else{
+            speedToggle = false;
+        }
 
         robot.lf.setPower(speeds[0] * speedMultiplier);
         robot.rf.setPower(speeds[1] * speedMultiplier);
@@ -1026,10 +1098,10 @@ public class TeleOpV2 extends OpMode
 //            telemetry.update();
             a++;
 
-            if(gamepad1.y){
-                positionControl.SetTaskDone();
-                return true;
-            }
+//            if(gamepad1.b && gamepad1.dpad_left){
+//                positionControl.SetTaskDone();
+//                return true;
+//            }
 
             Thread.sleep(25);
         }

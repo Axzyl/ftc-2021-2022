@@ -34,7 +34,7 @@ public class PositionControl {
     //private double kpd = 2.0;
     private double kpw = 1.0;       // here means around 9.7 degree robot will enter min_vw speed to turn
     //we will use the acceleration curve to control the speed
-    private final double BRAKE_DIS = 0.5;   //1.5M brake from Vmax to Vmin
+    private final double BRAKE_DIS = 0.54;   //1.5M brake from Vmax to Vmin
     private final double BRAKE_RATIO = (MAX_VD - MIN_VD) / BRAKE_DIS;
     private double brake_dis = 0;
     private final double BRAKE_ANGLE = 60.0 * Math.PI / 180;   //90 degree brake from MAX_VW to _MIN_VW
@@ -102,6 +102,10 @@ public class PositionControl {
     }
 
     public void goToTargetPosition(double[] setTarget, double vd, double vw, double disRes, double angleRes){
+        goToTargetPosition(setTarget, vd, vw, disRes, angleRes, true);
+    }
+
+    public void goToTargetPosition(double[] setTarget, double vd, double vw, double disRes, double angleRes, boolean brake){
 
         this.positionControlThread = null;
         this.robotTargetPos = setTarget;
@@ -118,6 +122,11 @@ public class PositionControl {
         if (this.targetVw < MIN_VW) this.targetVw = MIN_VW;
         if (this.targetVw > MAX_VW) this.targetVw = MAX_VW;
         brake_angle = Math.abs(this.targetVw - MIN_VW) / BRAKE_ANGLE_RATIO;
+
+        if(!brake){
+            brake_dis = 0;
+            brake_angle = 0;
+        }
 
         this.lastVw = 0;
         positionControlThread = new PositionControlThread();
